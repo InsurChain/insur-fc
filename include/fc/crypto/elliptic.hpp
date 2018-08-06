@@ -218,8 +218,8 @@ namespace fc {
 
      struct range_proof_info
      {
-         int64_t      exp;
-         int64_t      mantissa;
+         int          exp;
+         int          mantissa;
          uint64_t     min_value;
          uint64_t     max_value;
      };
@@ -252,43 +252,39 @@ namespace fc {
 
 
   } // namespace ecc
-  void to_variant( const ecc::private_key& var,  variant& vo, uint32_t max_depth );
-  void from_variant( const variant& var,  ecc::private_key& vo, uint32_t max_depth );
-  void to_variant( const ecc::public_key& var,  variant& vo, uint32_t max_depth );
-  void from_variant( const variant& var,  ecc::public_key& vo, uint32_t max_depth );
+  void to_variant( const ecc::private_key& var,  variant& vo );
+  void from_variant( const variant& var,  ecc::private_key& vo );
+  void to_variant( const ecc::public_key& var,  variant& vo );
+  void from_variant( const variant& var,  ecc::public_key& vo );
 
   namespace raw
   {
       template<typename Stream>
-      void unpack( Stream& s, fc::ecc::public_key& pk, uint32_t _max_depth )
+      void unpack( Stream& s, fc::ecc::public_key& pk)
       {
-          FC_ASSERT( _max_depth > 0 );
           ecc::public_key_data ser;
-          fc::raw::unpack( s, ser, _max_depth - 1 );
+          fc::raw::unpack(s,ser);
           pk = fc::ecc::public_key( ser );
       }
 
       template<typename Stream>
-      void pack( Stream& s, const fc::ecc::public_key& pk, uint32_t _max_depth )
+      void pack( Stream& s, const fc::ecc::public_key& pk)
       {
-          FC_ASSERT( _max_depth > 0 );
-          fc::raw::pack( s, pk.serialize(), _max_depth - 1 );
+          fc::raw::pack( s, pk.serialize() );
       }
 
       template<typename Stream>
-      void unpack( Stream& s, fc::ecc::private_key& pk, uint32_t _max_depth )
+      void unpack( Stream& s, fc::ecc::private_key& pk)
       {
-          FC_ASSERT( _max_depth > 0 );
           fc::sha256 sec;
-          unpack( s, sec, _max_depth - 1 );
+          unpack( s, sec );
           pk = ecc::private_key::regenerate(sec);
       }
 
       template<typename Stream>
-      void pack( Stream& s, const fc::ecc::private_key& pk, uint32_t _max_depth )
+      void pack( Stream& s, const fc::ecc::private_key& pk)
       {
-          FC_ASSERT( _max_depth > 0 );
-          fc::raw::pack( s, pk.get_secret(), _max_depth - 1 );
+          fc::raw::pack( s, pk.get_secret() );
       }
 
   } // namespace raw

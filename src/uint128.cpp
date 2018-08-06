@@ -1,19 +1,16 @@
 #include <fc/uint128.hpp>
 #include <fc/variant.hpp>
 #include <fc/crypto/bigint.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
-
 #include <stdexcept>
 #include "byteswap.hpp"
 
 namespace fc 
 {
-    typedef boost::multiprecision::uint128_t  m128;
-
     template <typename T>
     static void divide(const T &numerator, const T &denominator, T &quotient, T &remainder) 
     {
-      static const int bits = sizeof(T) * 8;
+
+      static const int bits = sizeof(T) * 8;//CHAR_BIT;
 
       if(denominator == 0) {
         throw std::domain_error("divide by zero");
@@ -223,11 +220,8 @@ namespace fc
 
     uint128& uint128::operator/=(const uint128 &b) 
     {
-        auto self = (m128(hi) << 64) + m128(lo);
-        auto other = (m128(b.hi) << 64) + m128(b.lo);
-        self /= other;
-        hi = static_cast<uint64_t>(self >> 64);
-        lo = static_cast<uint64_t>((self << 64 ) >> 64);
+        uint128 remainder;
+        divide(*this, b, *this, remainder);
         return *this;
     }
 
@@ -328,6 +322,8 @@ namespace fc
        
        result_hi = uint128( y[3], y[2] );
        result_lo = uint128( y[1], y[0] );
+       
+       return;
    }
 
    static uint8_t _popcount_64( uint64_t x )
@@ -356,14 +352,8 @@ namespace fc
       return _popcount_64( lo ) + _popcount_64( hi );
    }
 
-   void to_variant( const uint128& var,  variant& vo, uint32_t max_depth )
-   {
-      vo = std::string(var);
-   }
-   void from_variant( const variant& var, uint128& vo, uint32_t max_depth )
-   {
-      vo = uint128(var.as_string());
-   }
+   void to_variant( const uint128& var,  variant& vo )  { vo = std::string(var);         }
+   void from_variant( const variant& var,  uint128& vo ){ vo = uint128(var.as_string()); }
 
 } // namespace fc
 

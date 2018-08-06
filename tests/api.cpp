@@ -52,8 +52,6 @@ class variant_calculator
 using namespace fc::http;
 using namespace fc::rpc;
 
-#define MAX_DEPTH 10
-
 int main( int argc, char** argv )
 {
    try {
@@ -61,7 +59,7 @@ int main( int argc, char** argv )
 
       fc::http::websocket_server server;
       server.on_connection([&]( const websocket_connection_ptr& c ){
-               auto wsc = std::make_shared<websocket_api_connection>(*c, MAX_DEPTH);
+               auto wsc = std::make_shared<websocket_api_connection>(*c);
                auto login = std::make_shared<login_api>();
                login->calc = calc_api;
                wsc->register_api(fc::api<login_api>(login));
@@ -76,7 +74,7 @@ int main( int argc, char** argv )
          try { 
             fc::http::websocket_client client;
             auto con  = client.connect( "ws://localhost:8090" );
-            auto apic = std::make_shared<websocket_api_connection>(*con, MAX_DEPTH);
+            auto apic = std::make_shared<websocket_api_connection>(*con);
             auto remote_login_api = apic->get_remote_api<login_api>();
             auto remote_calc = remote_login_api->get_calc();
             remote_calc->on_result( []( uint32_t r ) { elog( "callback result ${r}", ("r",r) ); } );
@@ -169,8 +167,8 @@ int main( int argc, char** argv )
       fc::api<login_api>  napi(&napi_impl);
 
 
-      auto client_side = std::make_shared<local_api_connection>(MAX_DEPTH);
-      auto server_side = std::make_shared<local_api_connection>(MAX_DEPTH);
+      auto client_side = std::make_shared<local_api_connection>();
+      auto server_side = std::make_shared<local_api_connection>();
       server_side->set_remote_connection( client_side );
       client_side->set_remote_connection( server_side );
 

@@ -8,139 +8,91 @@
 namespace fc {
    namespace raw {
        template<typename Stream, typename T>
-       inline void pack( Stream& s, const flat_set<T>& value, uint32_t _max_depth ) {
-         FC_ASSERT( _max_depth > 0 );
-         --_max_depth;
-         pack( s, unsigned_int((uint32_t)value.size()), _max_depth );
+       inline void pack( Stream& s, const flat_set<T>& value ) {
+         pack( s, unsigned_int((uint32_t)value.size()) );
          auto itr = value.begin();
          auto end = value.end();
          while( itr != end ) {
-           fc::raw::pack( s, *itr, _max_depth );
+           fc::raw::pack( s, *itr );
            ++itr;
          }
        }
        template<typename Stream, typename T>
-       inline void unpack( Stream& s, flat_set<T>& value, uint32_t _max_depth ) {
-         FC_ASSERT( _max_depth > 0 );
-         --_max_depth;
-         unsigned_int size; unpack( s, size, _max_depth );
+       inline void unpack( Stream& s, flat_set<T>& value ) {
+         unsigned_int size; unpack( s, size );
          value.clear();
          FC_ASSERT( size.value*sizeof(T) < MAX_ARRAY_ALLOC_SIZE );
          value.reserve(size.value);
          for( uint32_t i = 0; i < size.value; ++i )
          {
              T tmp;
-             fc::raw::unpack( s, tmp, _max_depth );
+             fc::raw::unpack( s, tmp );
              value.insert( std::move(tmp) );
          }
        }
-       template<typename Stream, typename K, typename... V>
-       inline void pack( Stream& s, const flat_map<K,V...>& value, uint32_t _max_depth ) {
-         FC_ASSERT( _max_depth > 0 );
-         --_max_depth;
-         pack( s, unsigned_int((uint32_t)value.size()), _max_depth );
+       template<typename Stream, typename K, typename V>
+       inline void pack( Stream& s, const flat_map<K,V>& value ) {
+         pack( s, unsigned_int((uint32_t)value.size()) );
          auto itr = value.begin();
          auto end = value.end();
          while( itr != end ) {
-           fc::raw::pack( s, *itr, _max_depth );
+           fc::raw::pack( s, *itr );
            ++itr;
          }
        }
-       template<typename Stream, typename K, typename V, typename... A>
-       inline void unpack( Stream& s, flat_map<K,V,A...>& value, uint32_t _max_depth )
+       template<typename Stream, typename K, typename V>
+       inline void unpack( Stream& s, flat_map<K,V>& value ) 
        {
-         FC_ASSERT( _max_depth > 0 );
-         --_max_depth;
-         unsigned_int size; unpack( s, size, _max_depth );
+         unsigned_int size; unpack( s, size );
          value.clear();
          FC_ASSERT( size.value*(sizeof(K)+sizeof(V)) < MAX_ARRAY_ALLOC_SIZE );
          value.reserve(size.value);
          for( uint32_t i = 0; i < size.value; ++i )
          {
              std::pair<K,V> tmp;
-             fc::raw::unpack( s, tmp, _max_depth );
+             fc::raw::unpack( s, tmp );
              value.insert( std::move(tmp) );
          }
        }
-
-       template<typename Stream, typename T, typename A>
-       void pack( Stream& s, const bip::vector<T,A>& value, uint32_t _max_depth ) {
-         FC_ASSERT( _max_depth > 0 );
-         --_max_depth;
-         pack( s, unsigned_int((uint32_t)value.size()), _max_depth );
-         if( !std::is_fundamental<T>::value ) {
-            auto itr = value.begin();
-            auto end = value.end();
-            while( itr != end ) {
-              fc::raw::pack( s, *itr, _max_depth );
-              ++itr;
-            }
-         } else {
-             s.write( (const char*)value.data(), value.size() );
-         }
-       }
-
-       template<typename Stream, typename T, typename A>
-       void unpack( Stream& s, bip::vector<T,A>& value, uint32_t _max_depth ) {
-          FC_ASSERT( _max_depth > 0 );
-          --_max_depth;
-          unsigned_int size;
-          unpack( s, size, _max_depth );
-          value.resize( size );
-          if( !std::is_fundamental<T>::value ) {
-             for( auto& item : value )
-                unpack( s, item, _max_depth );
-          } else {
-             s.read( (char*)value.data(), value.size() );
-          }
-       }
-
    } // namespace raw
 
 
    template<typename T>
-   void to_variant( const flat_set<T>& var, variant& vo, uint32_t _max_depth )
+   void to_variant( const flat_set<T>& var,  variant& vo )
    {
-       FC_ASSERT( _max_depth > 0 );
-      --_max_depth;
        std::vector<variant> vars(var.size());
        size_t i = 0;
-       for( const auto& item : var )
-          vars[i++] = variant( item, _max_depth );
+       for( auto itr = var.begin(); itr != var.end(); ++itr, ++i )
+          vars[i] = variant(*itr);
        vo = vars;
    }
    template<typename T>
-   void from_variant( const variant& var, flat_set<T>& vo, uint32_t _max_depth )
+   void from_variant( const variant& var,  flat_set<T>& vo )
    {
-      FC_ASSERT( _max_depth > 0 );
-      --_max_depth;
       const variants& vars = var.get_array();
       vo.clear();
       vo.reserve( vars.size() );
-      for( const auto& item : vars )
-         vo.insert( item.as<T>(_max_depth) );
+      for( auto itr = vars.begin(); itr != vars.end(); ++itr )
+         vo.insert( itr->as<T>() );
    }
 
-   template<typename K, typename... T>
-   void to_variant( const flat_map<K, T...>& var,  variant& vo, uint32_t _max_depth )
+   template<typename K, typename T>
+   void to_variant( const flat_map<K, T>& var,  variant& vo )
    {
-       FC_ASSERT( _max_depth > 0 );
-      --_max_depth;
        std::vector< variant > vars(var.size());
        size_t i = 0;
-       for( const auto& item : var )
-          vars[i++] = variant( item, _max_depth );
+       for( auto itr = var.begin(); itr != var.end(); ++itr, ++i )
+          vars[i] = fc::variant(*itr);
        vo = vars;
    }
-   template<typename K, typename T, typename... A>
-   void from_variant( const variant& var,  flat_map<K, T, A...>& vo, uint32_t _max_depth )
+   template<typename K, typename T>
+   void from_variant( const variant& var,  flat_map<K, T>& vo )
    {
-      FC_ASSERT( _max_depth > 0 );
-      --_max_depth;
       const variants& vars = var.get_array();
       vo.clear();
-      for( const auto& item : vars )
-         vo.insert( item.as<std::pair<K,T>>(_max_depth) );
+      for( auto itr = vars.begin(); itr != vars.end(); ++itr )
+         vo.insert( itr->as< std::pair<K,T> >() );
+
    }
 
 }

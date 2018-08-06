@@ -76,10 +76,7 @@ namespace fc
        while (len > 0 && *first == 0) { first++; len--; }
        std::vector<char> result;
        result.resize(leading_zeros + len, 0);
-       if (len)
-       {
-            memcpy( result.data() + leading_zeros, first, len );
-       }
+       memcpy( result.data() + leading_zeros, first, len );
        return result;
     }
 }

@@ -118,11 +118,11 @@ namespace fc
        return result;
    }
 
-   void to_variant( const real128& var,  variant& vo, uint32_t max_depth )
+   void to_variant( const real128& var,  variant& vo )
    {
       vo = std::string(var);
    }
-   void from_variant( const variant& var,  real128& vo, uint32_t max_depth )
+   void from_variant( const variant& var,  real128& vo )
    {
      vo = real128(var.as_string());
    }

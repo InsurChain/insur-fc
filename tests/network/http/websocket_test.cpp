@@ -10,7 +10,6 @@ BOOST_AUTO_TEST_CASE(websocket_test)
 { 
     fc::http::websocket_client client;
     fc::http::websocket_connection_ptr s_conn, c_conn;
-    int port;
     {
         fc::http::websocket_server server;
         server.on_connection([&]( const fc::http::websocket_connection_ptr& c ){
@@ -20,26 +19,11 @@ BOOST_AUTO_TEST_CASE(websocket_test)
                 });
             });
 
-        bool listen_ok = false;
-        for( int i = 0; !listen_ok && i < 5; ++i )
-        {
-           port = std::rand() % 50000 + 10000;
-           try
-           {
-              server.listen( port );
-              listen_ok = true;
-           }
-           catch( std::exception )
-           {
-              // if the port is busy, listen() will throw a std::exception, do nothing here.
-           }
-        }
-        BOOST_REQUIRE( listen_ok );
-
+        server.listen( 8090 );
         server.start_accept();
 
         std::string echo;
-        c_conn = client.connect( "ws://localhost:" + fc::to_string(port) );
+        c_conn = client.connect( "ws://localhost:8090" );
         c_conn->on_message_handler([&](const std::string& s){
                     echo = s;
                 });
@@ -55,11 +39,11 @@ BOOST_AUTO_TEST_CASE(websocket_test)
         try {
             c_conn->send_message( "again" );
             BOOST_FAIL("expected assertion failure");
-        } catch (const fc::exception& e) {
+        } catch (const fc::assert_exception& e) {
             //std::cerr << e.to_string() << "\n";
         }
 
-        c_conn = client.connect( "ws://localhost:" + fc::to_string(port) );
+        c_conn = client.connect( "ws://localhost:8090" );
         c_conn->on_message_handler([&](const std::string& s){
                     echo = s;
                 });
@@ -72,20 +56,14 @@ BOOST_AUTO_TEST_CASE(websocket_test)
         c_conn->send_message( "again" );
         BOOST_FAIL("expected assertion failure");
     } catch (const fc::assert_exception& e) {
-        std::cerr << "Expected assertion failure : " << e.to_string() << "\n";
-    } catch (const fc::exception& e) {
-        BOOST_FAIL("Unexpected exception : " + e.to_string());
-    } catch (const std::exception& e) {
-        BOOST_FAIL("Unexpected exception : " + std::string(e.what()));
+        std::cerr << e.to_string() << "\n";
     }
 
     try {
-        c_conn = client.connect( "ws://localhost:" + fc::to_string(port) );
-        BOOST_FAIL("expected fc::exception (fail to connect)");
-    } catch (const fc::exception& e) {
-        std::cerr << "Excepted fc::exception : " << e.to_string() << "\n";
-    } catch (const std::exception& e) {
-        BOOST_FAIL("Unexpected exception : " + std::string(e.what()));
+        c_conn = client.connect( "ws://localhost:8090" );
+        BOOST_FAIL("expected assertion failure");
+    } catch (const fc::assert_exception& e) {
+        std::cerr << e.to_string() << "\n";
     }
 }
 

@@ -5,7 +5,7 @@
 #include <fc/crypto/openssl.hpp>
 #include <fc/crypto/ripemd160.hpp>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 # include <malloc.h>
 #else
 # include <alloca.h>
@@ -85,8 +85,8 @@ namespace fc { namespace ecc {
             ssl_bignum order;
             FC_ASSERT( EC_GROUP_get_order( group, order, ctx ) );
             private_key_secret bin;
-            FC_ASSERT( (size_t) BN_num_bytes( order ) == bin.data_size() );
-            FC_ASSERT( (size_t) BN_bn2bin( order, (unsigned char*) bin.data() ) == bin.data_size() );
+            FC_ASSERT( BN_num_bytes( order ) == bin.data_size() );
+            FC_ASSERT( BN_bn2bin( order, (unsigned char*) bin.data() ) == bin.data_size() );
             return bin;
         }
 
@@ -104,8 +104,8 @@ namespace fc { namespace ecc {
             FC_ASSERT( EC_GROUP_get_order( group, order, ctx ) );
             BN_rshift1( order, order );
             private_key_secret bin;
-            FC_ASSERT( (size_t) BN_num_bytes( order ) == bin.data_size() );
-            FC_ASSERT( (size_t) BN_bn2bin( order, (unsigned char*) bin.data() ) == bin.data_size() );
+            FC_ASSERT( BN_num_bytes( order ) == bin.data_size() );
+            FC_ASSERT( BN_bn2bin( order, (unsigned char*) bin.data() ) == bin.data_size() );
             return bin;
         }
 
@@ -388,27 +388,27 @@ namespace fc { namespace ecc {
     }
 }
 
-void to_variant( const ecc::private_key& var, variant& vo, uint32_t max_depth )
+void to_variant( const ecc::private_key& var,  variant& vo )
 {
-    to_variant( var.get_secret(), vo, max_depth );
+    vo = var.get_secret();
 }
 
-void from_variant( const variant& var,  ecc::private_key& vo, uint32_t max_depth )
+void from_variant( const variant& var,  ecc::private_key& vo )
 {
     fc::sha256 sec;
-    from_variant( var, sec, max_depth );
+    from_variant( var, sec );
     vo = ecc::private_key::regenerate(sec);
 }
 
-void to_variant( const ecc::public_key& var, variant& vo, uint32_t max_depth )
+void to_variant( const ecc::public_key& var,  variant& vo )
 {
-    to_variant( var.serialize(), vo, max_depth );
+    vo = var.serialize();
 }
 
-void from_variant( const variant& var,  ecc::public_key& vo, uint32_t max_depth )
+void from_variant( const variant& var,  ecc::public_key& vo )
 {
     ecc::public_key_data dat;
-    from_variant( var, dat, max_depth );
+    from_variant( var, dat );
     vo = ecc::public_key(dat);
 }
 

@@ -83,16 +83,19 @@ bool operator == ( const sha1& h1, const sha1& h2 ) {
   return memcmp( h1._hash, h2._hash, sizeof(h1._hash) ) == 0;
 }
   
-  void to_variant( const sha1& bi, variant& v, uint32_t max_depth )
+  void to_variant( const sha1& bi, variant& v )
   {
-     to_variant( std::vector<char>( (const char*)&bi, ((const char*)&bi) + sizeof(bi) ), v, max_depth );
+     v = std::vector<char>( (const char*)&bi, ((const char*)&bi) + sizeof(bi) );
   }
-  void from_variant( const variant& v, sha1& bi, uint32_t max_depth )
+  void from_variant( const variant& v, sha1& bi )
   {
-    std::vector<char> ve = v.as< std::vector<char> >( max_depth );
-    memset( &bi, char(0), sizeof(bi) );
+    std::vector<char> ve = v.as< std::vector<char> >();
     if( ve.size() )
-       memcpy( &bi, ve.data(), fc::min<size_t>(ve.size(),sizeof(bi)) );
+    {
+        memcpy(&bi, ve.data(), fc::min<size_t>(ve.size(),sizeof(bi)) );
+    }
+    else
+        memset( &bi, char(0), sizeof(bi) );
   }
   
 } // fc

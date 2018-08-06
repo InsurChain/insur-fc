@@ -1,5 +1,4 @@
 #pragma once
-#include <fc/io/raw_fwd.hpp>
 #include <fc/crypto/sha512.hpp>
 #include <fc/crypto/sha256.hpp>
 #include <fc/uint128.hpp>

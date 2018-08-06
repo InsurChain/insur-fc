@@ -90,9 +90,9 @@ namespace fc
       friend class mutable_variant_object;
    };
    /** @ingroup Serializable */
-   void to_variant( const variant_object& var, variant& vo, uint32_t max_depth = 1 );
+   void to_variant( const variant_object& var,  variant& vo );
    /** @ingroup Serializable */
-   void from_variant( const variant& var, variant_object& vo, uint32_t max_depth = 1 );
+   void from_variant( const variant& var,  variant_object& vo );
 
 
   /**
@@ -169,12 +169,11 @@ namespace fc
       *
       *  @return *this;
       */
-      mutable_variant_object& operator()( string key, variant var, uint32_t max_depth = 1 );
+      mutable_variant_object& operator()( string key, variant var );
       template<typename T>
-      mutable_variant_object& operator()( string key, T&& var, uint32_t max_depth )
+      mutable_variant_object& operator()( string key, T&& var )
       {
-         _FC_ASSERT( max_depth > 0, "Recursion depth exceeded!" );
-         set( std::move(key), variant( fc::forward<T>(var), max_depth - 1 ) );
+         set(std::move(key), variant( fc::forward<T>(var) ) );
          return *this;
       }
       /**
@@ -217,44 +216,9 @@ namespace fc
       std::unique_ptr< std::vector< entry > > _key_value;
       friend class variant_object;
    };
-
-   class limited_mutable_variant_object : public mutable_variant_object
-   {
-      public:
-         limited_mutable_variant_object( uint32_t max_depth, bool skip_on_exception = false );
-
-         template<typename T>
-         limited_mutable_variant_object& operator()( string key, T&& var )
-         {
-            if( _reached_depth_limit )
-               // _skip_on_exception will always be true here
-               return *this;
-
-            optional<variant> v;
-            try
-            {
-               v = variant( fc::forward<T>(var), _max_depth );
-            }
-            catch( ... )
-            {
-               if( !_skip_on_exception )
-                  throw;
-               v = variant( "[ERROR: Caught exception while converting data to variant]" );
-            }
-            set( std::move(key), *v );
-            return *this;
-         }
-         limited_mutable_variant_object& operator()( const variant_object& vo );
-
-      private:
-         const uint32_t _max_depth;       ///< The depth limit
-         const bool _reached_depth_limit; ///< Indicates whether we've reached depth limit
-         const bool _skip_on_exception;   ///< If set to true, won't rethrow exceptions when reached depth limit
-   };
-
    /** @ingroup Serializable */
-   void to_variant( const mutable_variant_object& var, variant& vo, uint32_t max_depth = 1 );
+   void to_variant( const mutable_variant_object& var,  variant& vo );
    /** @ingroup Serializable */
-   void from_variant( const variant& var, mutable_variant_object& vo, uint32_t max_depth = 1 );
+   void from_variant( const variant& var,  mutable_variant_object& vo );
 
 } // namespace fc

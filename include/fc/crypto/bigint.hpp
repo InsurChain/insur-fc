@@ -69,8 +69,8 @@ namespace fc {
 
   class variant;
   /** encodes the big int as base64 string, or a number */
-  void to_variant( const bigint& bi, variant& v, uint32_t max_depth = 1 );
+  void to_variant( const bigint& bi, variant& v );
   /** decodes the big int as base64 string, or a number */
-  void from_variant( const variant& v, bigint& bi, uint32_t max_depth = 1 );
+  void from_variant( const variant& v, bigint& bi );
 } // namespace fc
 

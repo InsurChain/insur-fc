@@ -18,7 +18,6 @@ class file_appender : public appender {
             bool                               rotate = false;
             microseconds                       rotation_interval;
             microseconds                       rotation_limit;
-            uint32_t                           max_object_depth;
          };
          file_appender( const variant& args );
          ~file_appender();
@@ -32,4 +31,4 @@ class file_appender : public appender {
 
 #include <fc/reflect/reflect.hpp>
 FC_REFLECT( fc::file_appender::config,
-            (format)(filename)(flush)(rotate)(rotation_interval)(rotation_limit)(max_object_depth) )
+            (format)(filename)(flush)(rotate)(rotation_interval)(rotation_limit) )

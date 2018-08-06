@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <secp256k1.h>
 
-#if _WIN32
+#ifdef _MSC_VER
 # include <malloc.h>
 #else
 # include <alloca.h>
@@ -30,9 +30,8 @@ namespace fc { namespace ecc {
 
         void _init_lib() {
             static const secp256k1_context_t* ctx = _get_context();
-            (void)ctx;
             static int init_o = init_openssl();
-            (void)init_o;
+            (void)ctx;
         }
 
         class public_key_impl

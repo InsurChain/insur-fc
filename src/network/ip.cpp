@@ -137,20 +137,20 @@ namespace fc { namespace ip {
 
 }  // namespace ip
 
-  void to_variant( const ip::endpoint& var,  variant& vo, uint32_t max_depth )
+  void to_variant( const ip::endpoint& var,  variant& vo )
   {
       vo = fc::string(var);
   }
-  void from_variant( const variant& var,  ip::endpoint& vo, uint32_t max_depth )
+  void from_variant( const variant& var,  ip::endpoint& vo )
   {
      vo = ip::endpoint::from_string(var.as_string());
   }
 
-  void to_variant( const ip::address& var,  variant& vo, uint32_t max_depth )
+  void to_variant( const ip::address& var,  variant& vo )
   {
     vo = fc::string(var);
   }
-  void from_variant( const variant& var,  ip::address& vo, uint32_t max_depth )
+  void from_variant( const variant& var,  ip::address& vo )
   {
     vo = ip::address(var.as_string());
   }
